@@ -17,17 +17,14 @@ using namespace std;
 Processor& System::Cpu() { return cpu_; }
 
 // Return a container composed of the system's processes
-vector<Process>& System::Processes() { 
-    const vector<int> & pids = LinuxParser::Pids();
-    for(const int & p : pids){
-        processes_.emplace_back(p);
-    }
-    sort(processes_.begin(), processes_.end(), 
-        [](const Process& A, const Process& B){
-            return (A < B);
-        }
-        );
-    return processes_; 
+vector<Process>& System::Processes() {
+  const vector<int>& pids = LinuxParser::Pids();
+  for (const int& p : pids) {
+    processes_.emplace_back(p);
+  }
+  sort(processes_.begin(), processes_.end(),
+       [](const Process& A, const Process& B) { return (A < B); });
+  return processes_;
 }
 
 // Return the system's kernel identifier (string)
