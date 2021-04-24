@@ -73,21 +73,8 @@ vector<int> LinuxParser::Pids() {
 // DONE: Read and return the system memory utilization; returns a float that is
 // the percentage of memory used
 float LinuxParser::MemoryUtilization() {
-  float mem_total, mem_free;
-  string line, key, value, units;
-  std::ifstream stream(kProcDirectory + kMeminfoFilename);
-  if (stream.is_open()) {
-    while (std::getline(stream, line)) {
-      std::istringstream linestream(line);
-      while (linestream >> key >> value >> units) {
-        if (key == "MemTotal:") {
-          mem_total = std::stof(value);
-        } else if (key == "MemFree:") {
-          mem_free = std::stof(value);
-        }
-      }
-    }
-  }
+  float mem_total = FindValueByKey<float>("MemTotal:", kMeminfoFilename);
+  float mem_free = FindValueByKey<float>("MemFree:", kMeminfoFilename);
   return (mem_total - mem_free) / mem_total;
 }
 
@@ -160,36 +147,12 @@ vector<string> LinuxParser::CpuUtilization() {
 
 // DONE: Read and return the total number of processes
 int LinuxParser::TotalProcesses() {
-  string line, key, value;
-  std::ifstream stream(kProcDirectory + kStatFilename);
-  if (stream.is_open()) {
-    while (std::getline(stream, line)) {
-      std::istringstream linestream(line);
-      while (linestream >> key >> value) {
-        if (key == "processes") {
-          return std::stoi(value);
-        }
-      }
-    }
-  }
-  return 0;
+  return FindValueByKey<int>("processes", kStatFilename);
 }
 
 // DONE: Read and return the number of running processes
 int LinuxParser::RunningProcesses() {
-  string line, key, value;
-  std::ifstream stream(kProcDirectory + kStatFilename);
-  if (stream.is_open()) {
-    while (std::getline(stream, line)) {
-      std::istringstream linestream(line);
-      while (linestream >> key >> value) {
-        if (key == "procs_running") {
-          return std::stoi(value);
-        }
-      }
-    }
-  }
-  return 0;
+  return FindValueByKey<int>("procs_running", kStatFilename);
 }
 
 // DONE: Read and return the command associated with a process
@@ -206,46 +169,19 @@ string LinuxParser::Command(int pid) {
 
 // DONE: Read and return the memory used by a process
 string LinuxParser::Ram(int pid) {
-  string line, key, value;
-  value = "";
-  std::ifstream stream(kProcDirectory + "/" + std::to_string(pid) +
-                       kStatusFilename);
-  if (stream.is_open()) {
-    while (std::getline(stream, line)) {
-      std::replace(line.begin(), line.end(), ':', ' ');
-      std::istringstream linestream(line);
-      while (linestream >> key >> value) {
-        if (key == "VmSize") {
-          return value;
-        }
-      }
-    }
-  }
-  return value;
+  return FindValueByKey<string>("VmData:",
+                                "/" + std::to_string(pid) + kStatusFilename);
+  // Switched to VmData as VmSize returns virtual memory not the physical RAM on
+  // my machine
 }
 
 // DONE: Read and return the user ID associated with a process
 string LinuxParser::Uid(int pid) {
-  string line, key, value;
-  value = "";
-  std::ifstream stream(kProcDirectory + "/" + std::to_string(pid) +
-                       kStatusFilename);
-  if (stream.is_open()) {
-    while (std::getline(stream, line)) {
-      std::replace(line.begin(), line.end(), ':', ' ');
-      std::istringstream linestream(line);
-      while (linestream >> key >> value) {
-        if (key == "Uid") {
-          return value;
-        }
-      }
-    }
-  }
-  return value;
+  return FindValueByKey<string>("Uid:",
+                                "/" + std::to_string(pid) + kStatusFilename);
 }
 
-// TODO: Read and return the user associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
+// Read and return the user associated with a process
 string LinuxParser::User(int pid) {
   string uid = Uid(pid);
   string line, key, other;
@@ -268,3 +204,26 @@ string LinuxParser::User(int pid) {
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::UpTime(int pid [[maybe_unused]]) { return 0; }
+
+// Generic function for repetedly used filestream searching. Finds the value
+// stored for the string key_filter in the file specified by filename under the
+// /proc/ directory
+template <typename T>
+T LinuxParser::FindValueByKey(std::string const& key_filter,
+                              std::string const& filename) {
+  std::string line, key;
+  T value;
+
+  std::ifstream stream(kProcDirectory + filename);
+  if (stream.is_open()) {
+    while (std::getline(stream, line)) {
+      std::istringstream linestream(line);
+      while (linestream >> key >> value) {
+        if (key == key_filter) {
+          return value;
+        }
+      }
+    }
+  }
+  return value;
+}
