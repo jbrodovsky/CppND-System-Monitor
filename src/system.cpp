@@ -11,40 +11,37 @@
 #include "process.h"
 #include "processor.h"
 
-using std::set;
-using std::size_t;
-using std::string;
-using std::vector;
+using namespace std;
 
-// DONE: Return the system's CPU
+// Return the system's CPU
 Processor& System::Cpu() { return cpu_; }
 
-// DONE: Return a container composed of the system's processes
-vector<Process>& System::Processes() { 
-    for(int p : LinuxParser::Pids()){
-        Process P{p};
-        processes_.push_back(P);
-    }
-    sort(processes_.begin(), processes_.end(), [](const Process& A, const Process& B){
-        return (A < B);
-    });
-    return processes_; 
+// Return a container composed of the system's processes
+vector<Process>& System::Processes() {
+  const vector<int>& pids = LinuxParser::Pids();
+  for (const int& p : pids) {
+    processes_.emplace_back(p);
+  }
+  sort(processes_.begin(), processes_.end(),
+       [](const Process& A, const Process& B) { return (A < B); });
+  
+  return processes_;
 }
 
-// DONE: Return the system's kernel identifier (string)
-std::string System::Kernel() { return LinuxParser::Kernel(); }
+// Return the system's kernel identifier (string)
+string System::Kernel() { return LinuxParser::Kernel(); }
 
-// DONE: Return the system's memory utilization
+// Return the system's memory utilization
 float System::MemoryUtilization() { return LinuxParser::MemoryUtilization(); }
 
-// DONE: Return the operating system name
-std::string System::OperatingSystem() { return LinuxParser::OperatingSystem(); }
+// Return the operating system name
+string System::OperatingSystem() { return LinuxParser::OperatingSystem(); }
 
-// DONE: Return the number of processes actively running on the system
+// Return the number of processes actively running on the system
 int System::RunningProcesses() { return LinuxParser::RunningProcesses(); }
 
-// DONE: Return the total number of processes on the system
+// Return the total number of processes on the system
 int System::TotalProcesses() { return LinuxParser::TotalProcesses(); }
 
-// DONE: Return the number of seconds since the system started running
+// Return the number of seconds since the system started running
 long int System::UpTime() { return LinuxParser::UpTime(); }
