@@ -147,18 +147,46 @@ vector<string> LinuxParser::CpuUtilization() {
 
 // Returns the process's CPU utilization as a percent of total CPU activity
 float LinuxParser::CpuUtilization(int pid){
+  long uptime = LinuxParser::UpTime();
   // see for explaination: https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat
-  auto starttime = 0;  
+  long utime = 0;
+  long stime = 0;
+  long cutime = 0;
+  long cstime = 0;
+  long starttime = 0;  
   string line;
   std::ifstream stream(kProcDirectory + "/" + to_string(pid) + "/" + kStatFilename);
   if (stream.is_open() && std::getline(stream, line)) {
     std::istringstream linestream(line);
     string value;
-    starttime = line.at(22);
+    for(int i = 1; i<23; i++){
+      linestream >> value;
+      
+      switch (i)
+      {
+      case 14:
+        utime = stol(value);
+        break;
+      case 15:
+        stime = stol(value);
+        break;
+      case 16:
+        cutime = stol(value);
+        break;
+      case 17:
+        cstime = stol(value);
+        break;
+      case 22:
+        starttime = stol(value);
+        break;
+      default:
+        break;
+      }
+    }
   }
 
-  long total_time = LinuxParser::UpTime(pid);
-  float seconds = LinuxParser::UpTime() - (starttime / sysconf(_SC_CLK_TCK));
+  long total_time = utime + stime + cutime + cstime;
+  float seconds = uptime - (starttime / sysconf(_SC_CLK_TCK));
   return (total_time / sysconf(_SC_CLK_TCK)) / seconds;
 }
 // Read and return the total number of processes
