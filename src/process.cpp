@@ -25,10 +25,8 @@ Process::Process(int pid) : process_id_(pid) {
 int Process::Pid() { return process_id_; }
 
 // DONE: Return this process's CPU utilization
-float Process::CpuUtilization() { 
-  long active = LinuxParser::ActiveJiffies(Pid());
-  
-  cpu_usage_ = (active / (LinuxParser::Jiffies()));
+float Process::CpuUtilization() {   
+  cpu_usage_ = LinuxParser::CpuUtilization(Pid());
   return cpu_usage_; 
 }
 
