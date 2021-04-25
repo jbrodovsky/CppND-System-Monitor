@@ -59,7 +59,9 @@ string Process::User() {
 }
 
 // Return the age of this process (in seconds)
-long int Process::UpTime() { return LinuxParser::UpTime(Pid()); }
+long int Process::UpTime() { 
+  up_time_ = LinuxParser::UpTime(Pid()); 
+  return up_time_;}
 
 // Overload the "less than" comparison operator for Process objects
 bool Process::operator<(Process const& a) const {
