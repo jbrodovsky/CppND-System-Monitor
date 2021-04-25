@@ -23,8 +23,8 @@ vector<Process>& System::Processes() {
     processes_.emplace_back(p);
   }
   sort(processes_.begin(), processes_.end(),
-       [](const Process& A, const Process& B) { return (A < B); });
-  
+       [](const Process& A, const Process& B) { return (B < A); });
+
   return processes_;
 }
 
