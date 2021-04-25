@@ -1,37 +1,26 @@
 #include "format.h"
 
+#include <chrono>
+#include <iomanip>
+#include <sstream>
 #include <string>
 
 using std::string;
 
-// TODO: Complete this helper function
-// INPUT: Long int measuring seconds
-// OUTPUT: HH:MM:SS
-// REMOVE: [[maybe_unused]] once you define the function
+// Formats a long integer corresponding to a duration in seconds to HH:MM:SS
+// using the chrono module from the standard library
 string Format::ElapsedTime(long seconds) {
-  int HH = seconds / 3600;
-  int MM = (seconds - 3600 * HH) / 60;
-  int SS = seconds - 3600 * HH - 60 * MM;
+  std::chrono::seconds SS{seconds};
+  std::chrono::hours HH = std::chrono::duration_cast<std::chrono::hours>(SS);
+  SS -= std::chrono::duration_cast<std::chrono::seconds>(HH);
+  std::chrono::minutes MM =
+      std::chrono::duration_cast<std::chrono::minutes>(SS);
+  SS -= std::chrono::duration_cast<std::chrono::seconds>(MM);
 
-  string out;
-  if (HH < 1) {
-    out += "00";
-  } else {
-    out += std::to_string(HH);
-  }
-  out += ":";
-  if (MM < 1) {
-    out += "00";
-  } else if (MM < 10) {
-    out += "0";
-  }
-  out += std::to_string(MM) + ":";
-  if (SS < 1) {
-    out += "00";
-  } else if (SS < 10) {
-    out += "0";
-  }
+  std::stringstream out{};
+  out << std::setw(2) << std::setfill('0') << HH.count() << ":" << std::setw(2)
+      << std::setfill('0') << MM.count() << ":" << std::setw(2)
+      << std::setfill('0') << SS.count();
 
-  out += std::to_string(SS);
-  return out;
+  return out.str();
 }

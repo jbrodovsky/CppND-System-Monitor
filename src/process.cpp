@@ -25,9 +25,9 @@ Process::Process(int pid) : process_id_(pid) {
 int Process::Pid() { return process_id_; }
 
 // DONE: Return this process's CPU utilization
-float Process::CpuUtilization() {   
+float Process::CpuUtilization() {
   cpu_usage_ = LinuxParser::CpuUtilization(Pid());
-  return cpu_usage_; 
+  return cpu_usage_;
 }
 
 // DONE: Return the command that generated this process
@@ -42,7 +42,7 @@ string Process::Command() {
 
 // DONE: Return this process's memory utilization
 string Process::Ram() {
-  float ram_f_ = std::stof(LinuxParser::Ram(process_id_))*0.001;
+  float ram_f_ = std::stof(LinuxParser::Ram(process_id_)) * 0.001;
   ram_ = std::to_string(ram_f_);
   ram_ = ram_.substr(0, 5);
   return ram_;
@@ -51,11 +51,10 @@ string Process::Ram() {
 // DONE: Return the user (name) that generated this process
 string Process::User() {
   user_ = LinuxParser::User(Pid());
-  if(user_.length()<6){
+  if (user_.length() < 6) {
     return user_;
-  }
-  else{
-    return user_.substr(0,4)+"...";
+  } else {
+    return user_.substr(0, 4) + "...";
   }
 }
 

@@ -182,7 +182,7 @@ float LinuxParser::CpuUtilization(int pid){
 
   long total_time = utime + stime + cutime + cstime;
   float seconds = uptime - (starttime / sysconf(_SC_CLK_TCK));
-  return (100 * total_time / sysconf(_SC_CLK_TCK)) / seconds;
+  return (total_time / sysconf(_SC_CLK_TCK)) / seconds;
 }
 // Read and return the total number of processes
 int LinuxParser::TotalProcesses() {
