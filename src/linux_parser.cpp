@@ -86,9 +86,9 @@ long LinuxParser::UpTime() {
   if (stream.is_open() && std::getline(stream, line)) {
     std::istringstream linestream(line);
     linestream >> uptime;
-    try{
+    try {
       return stol(uptime);
-    } catch (const std::invalid_argument& arg){
+    } catch (const std::invalid_argument& arg) {
       return 0.0;
     }
   }
@@ -146,42 +146,49 @@ vector<string> LinuxParser::CpuUtilization() {
 }
 
 // Returns the process's CPU utilization as a percent of total CPU activity
-float LinuxParser::CpuUtilization(int pid){
+float LinuxParser::CpuUtilization(int pid) {
   long uptime = LinuxParser::UpTime();
-  // see for explaination: https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat
+  // see for explaination:
+  // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat
   long utime = 0;
   long stime = 0;
   long cutime = 0;
   long cstime = 0;
-  long starttime = 0;  
+  long starttime = 0;
   string line;
-  std::ifstream stream(kProcDirectory + "/" + to_string(pid) + "/" + kStatFilename);
+  std::ifstream stream(kProcDirectory + "/" + to_string(pid) + "/" +
+                       kStatFilename);
   if (stream.is_open() && std::getline(stream, line)) {
     std::istringstream linestream(line);
-    string value;
-    for(int i = 1; i<23; i++){
-      linestream >> value;
-      
-      switch (i)
-      {
-      case 14:
-        utime = stol(value);
-        break;
-      case 15:
-        stime = stol(value);
-        break;
-      case 16:
-        cutime = stol(value);
-        break;
-      case 17:
-        cstime = stol(value);
-        break;
-      case 22:
-        starttime = stol(value);
-        break;
-      default:
-        break;
+    try {
+      string value;
+      for (int i = 1; i < 23; i++) {
+        linestream >> value;
+
+        switch (i) {
+          case 14:
+            utime = stol(value);
+            break;
+          case 15:
+            stime = stol(value);
+            break;
+          case 16:
+            cutime = stol(value);
+            break;
+          case 17:
+            cstime = stol(value);
+            break;
+          case 22:
+            starttime = stol(value);
+            break;
+          default:
+            break;
+        }
       }
+    } catch (const std::invalid_argument& arg) {
+      // The above block usually works just fine, but occasionally a stol(...)
+      // call will throw an exception somewhere and this is the only place I can
+      // narrow it down to.
     }
   }
 
@@ -221,8 +228,7 @@ string LinuxParser::Ram(int pid) {
 
 // Read and return the user ID associated with a process
 string LinuxParser::Uid(int pid) {
-  return FindValueByKey<string>("Uid:",
-                                "/" + to_string(pid) + kStatusFilename);
+  return FindValueByKey<string>("Uid:", "/" + to_string(pid) + kStatusFilename);
 }
 
 // Read and return the user associated with a process
@@ -246,17 +252,19 @@ string LinuxParser::User(int pid) {
 }
 
 // TODO: Read and return the uptime of a process
-long LinuxParser::UpTime(int pid){
-  // see for explaination: https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat 
+long LinuxParser::UpTime(int pid) {
+  // see for explaination:
+  // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat
   string line;
-  std::ifstream stream(kProcDirectory + "/" + to_string(pid) + "/" + kStatFilename);
+  std::ifstream stream(kProcDirectory + "/" + to_string(pid) + "/" +
+                       kStatFilename);
   if (stream.is_open() && std::getline(stream, line)) {
-    //std::istringstream linestream(line);
+    // std::istringstream linestream(line);
     auto utime = line.at(13);
     auto stime = line.at(14);
     auto cutime = line.at(15);
     auto cstime = line.at(16);
-    //auto starttime = line.at(22);
+    // auto starttime = line.at(22);
     return utime + stime + cutime + cstime;
   }
   stream.close();
