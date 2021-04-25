@@ -42,6 +42,7 @@ enum CPUStates {
   kGuestNice_
 };
 std::vector<std::string> CpuUtilization();
+float LinuxParser::CpuUtilization(int pid);
 long Jiffies();
 long ActiveJiffies();
 long ActiveJiffies(int pid);

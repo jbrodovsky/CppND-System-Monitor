@@ -26,11 +26,9 @@ int Process::Pid() { return process_id_; }
 
 // DONE: Return this process's CPU utilization
 float Process::CpuUtilization() { 
-  //long uptime = LinuxParser::UpTime();
-  //vector<float> values = LinuxParser::CpuUtilization(Pid());
-  //cpu_usage_ = LinuxParser::ActiveJiffies(Pid()) / LinuxParser::CpuUtilization();
+  long active = LinuxParser::ActiveJiffies(Pid());
   
-  cpu_usage_ = LinuxParser::ActiveJiffies(Pid());// / (LinuxParser::Jiffies() - LinuxParser::IdleJiffies());
+  cpu_usage_ = (active / (LinuxParser::Jiffies()));
   return cpu_usage_; 
 }
 
